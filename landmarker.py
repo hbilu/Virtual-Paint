@@ -55,3 +55,25 @@ def draw_marker(rgb_img, result: mp.tasks.vision.HandLandmarkerResult):
                 mp.solutions.drawing_styles.get_default_hand_landmarks_style(),
                 mp.solutions.drawing_styles.get_default_hand_connections_style())
         return output_img
+
+
+def up_fingers(result: mp.tasks.vision.HandLandmarkerResult):
+    finger_tip_id = [mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
+                     mp.solutions.hands.HandLandmark.PINKY_TIP
+                     ]
+    finger_statue = {'LEFT_INDEX': False,
+                     'LEFT_PINKY': False,
+                     'RIGHT_INDEX': False,
+                     'RIGHT_PINKY': False
+                     }
+    if not hasattr(result, 'hand_landmarks'):
+        print('result.hand_landmarks == []')
+    else:
+        for index, hand in enumerate(result.handedness):
+            hand_label = hand[0].category_name
+            hand_landmarks = result.hand_landmarks[index]
+            for tip_id in finger_tip_id:
+                finger_name = tip_id.name.split("_")[0]
+                if hand_landmarks[tip_id].y < hand_landmarks[tip_id - 2].y:
+                    finger_statue[hand_label.upper() + "_" + finger_name] = True
+        return finger_statue

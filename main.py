@@ -55,6 +55,8 @@ def main_func():
         hands.detect_async(frame)
         frame = draw_marker(frame, hands.result)
 
+        finger_statue = up_fingers(hands.result)
+
         for index in range(len(color_panel)):
             color_panel[index].draw_rect(frame)
 
