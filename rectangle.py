@@ -33,6 +33,6 @@ class Rect():
         return img
 
     def is_over(self, x, y):
-        if (self.x + self.w > x > self.x) and (self.y + self.h > y > self.y):
+        if (self.x + self.width > x > self.x) and (self.y + self.height > y > self.y):
             return True
         return False

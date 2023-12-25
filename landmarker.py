@@ -2,6 +2,7 @@ import time
 from mediapipe.framework.formats import landmark_pb2
 import mediapipe as mp
 import numpy as np
+import math
 
 
 class HandLandmarker():
@@ -34,13 +35,11 @@ class HandLandmarker():
 
 def draw_marker(rgb_img, result: mp.tasks.vision.HandLandmarkerResult):
     if not hasattr(result, 'hand_landmarks'):
-        # print('result.hand_landmarks == []')
         return rgb_img
     else:
         hand_landmark_list = result.hand_landmarks
         if(hand_landmark_list == []):
             return rgb_img
-        # print(hand_landmark_list)
         output_img = np.copy(rgb_img)
         for index in range(len(hand_landmark_list)):
             hand_landmarks = hand_landmark_list[index]
@@ -55,6 +54,26 @@ def draw_marker(rgb_img, result: mp.tasks.vision.HandLandmarkerResult):
                 mp.solutions.drawing_styles.get_default_hand_landmarks_style(),
                 mp.solutions.drawing_styles.get_default_hand_connections_style())
         return output_img
+
+
+def positions(img, result: mp.tasks.vision.HandLandmarkerResult):
+    left_pos_list = []
+    right_pos_list = []
+    height, width, _ = img.shape
+    if not hasattr(result, 'hand_landmarks'):
+        print('result.hand_landmarks == []')
+    else:
+        for index, hand in enumerate(result.handedness):
+            hand_label = hand[0].category_name
+            hand_landmarks = result.hand_landmarks[index]
+            for id in hand_landmarks:
+                px = min(math.floor(id.x * width), width - 1)
+                py = min(math.floor(id.y * height), height - 1)
+                if hand_label == 'Right':
+                    right_pos_list.append((px, py))
+                elif hand_label == 'Left':
+                    left_pos_list.append((px, py))
+    return left_pos_list, right_pos_list
 
 
 def up_fingers(result: mp.tasks.vision.HandLandmarkerResult):
@@ -77,3 +96,4 @@ def up_fingers(result: mp.tasks.vision.HandLandmarkerResult):
                 if hand_landmarks[tip_id].y < hand_landmarks[tip_id - 2].y:
                     finger_statue[hand_label.upper() + "_" + finger_name] = True
         return finger_statue
+
